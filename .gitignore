@@ -1,0 +1,18 @@
+# Backend (Maven/Java)
+backend/target/
+*.class
+
+# Frontend (Next.js/Node)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Segredos do servidor (nunca versionar) - o .example fica no git
+backend-seguro/target/
+.env
+.env.local
+.env*.local
+
+# Diversos
+.DS_Store
+*.log

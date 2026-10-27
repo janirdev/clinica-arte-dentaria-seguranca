@@ -1,0 +1,178 @@
+:root {
+  --teal: #0b7285;
+  --teal-dark: #095c6b;
+  --teal-light: #e6f4f6;
+  --ink: #13293d;
+  --muted: #5a6b7b;
+  --bg: #f1f5f8;
+  --surface: #ffffff;
+  --border: #e2e9ee;
+  --danger: #b00020;
+  --danger-light: #fdecef;
+  --success: #1b7f4b;
+  --success-light: #e7f6ee;
+  --warn-bg: #fff3cd;
+  --warn-border: #ffe69c;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(19, 41, 61, 0.08), 0 6px 20px rgba(19, 41, 61, 0.05);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+a { color: var(--teal); }
+
+/* ---- Banner de laboratório ---- */
+.lab-banner {
+  background: var(--danger);
+  color: #fff;
+  padding: 7px 16px;
+  font-size: 13px;
+  text-align: center;
+  letter-spacing: 0.2px;
+}
+
+/* ---- Cabeçalho + navegação ---- */
+.header {
+  background: linear-gradient(90deg, var(--teal), var(--teal-dark));
+  color: #fff;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  box-shadow: var(--shadow);
+}
+.brand {
+  font-size: 19px;
+  font-weight: 700;
+  padding: 16px 0;
+  white-space: nowrap;
+}
+.nav { display: flex; gap: 4px; flex-wrap: wrap; }
+.nav a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 18px 14px;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+}
+.nav a:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.nav a.active { color: #fff; border-bottom-color: #fff; font-weight: 600; }
+
+/* ---- Seletor de modo ---- */
+.mode-switch { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.mode-switch .mode-label { color: rgba(255,255,255,0.85); }
+.mode-switch select {
+  width: auto; padding: 6px 10px; font-size: 13px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.12); color: #fff;
+}
+.mode-switch select option { color: #13293d; }
+.mode-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.mode-dot.off { background: #ffb3b3; box-shadow: 0 0 0 3px rgba(255,0,0,0.25); }
+.mode-dot.on { background: #8ef0b0; box-shadow: 0 0 0 3px rgba(0,255,100,0.2); }
+
+.container { max-width: 880px; margin: 0 auto; padding: 28px 20px 60px; }
+
+h1 { font-size: 28px; margin: 0 0 6px; }
+h2 { font-size: 20px; margin: 28px 0 12px; }
+.subtitle { color: var(--muted); margin: 0 0 24px; }
+
+/* ---- Cartões ---- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.card-link { text-decoration: none; color: inherit; display: block; transition: transform 0.15s, box-shadow 0.15s; }
+.card-link:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(19, 41, 61, 0.12); }
+.card-icon { font-size: 30px; }
+.card h3 { margin: 10px 0 6px; }
+.card p { margin: 0; color: var(--muted); font-size: 14px; }
+
+/* ---- Botões ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.btn-primary { background: var(--teal); color: #fff; }
+.btn-primary:hover { background: var(--teal-dark); }
+.btn-ghost { background: #fff; color: var(--teal); border-color: var(--border); }
+.btn-ghost:hover { background: var(--teal-light); }
+.btn-danger { background: #fff; color: var(--danger); border-color: #f3c2cb; }
+.btn-danger:hover { background: var(--danger-light); }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+
+/* ---- Formulários ---- */
+.form { display: grid; gap: 16px; max-width: 420px; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--muted); }
+input, select, textarea {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px var(--teal-light);
+}
+textarea { min-height: 80px; resize: vertical; }
+
+/* ---- Alertas ---- */
+.alert { padding: 12px 16px; border-radius: 10px; font-size: 14px; margin-top: 16px; }
+.alert-info { background: var(--teal-light); color: var(--teal-dark); }
+.alert-error { background: var(--danger-light); color: var(--danger); }
+.alert-success { background: var(--success-light); color: var(--success); }
+.alert-warn { background: var(--warn-bg); border: 1px solid var(--warn-border); color: #6b5300; }
+
+/* ---- Distintivos de estado ---- */
+.badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+.badge-MARCADA { background: #e7f0ff; color: #1b4fb0; }
+.badge-REALIZADA { background: var(--success-light); color: var(--success); }
+.badge-CANCELADA { background: #f1f3f5; color: var(--muted); }
+
+/* ---- Lista de consultas ---- */
+.consulta { margin-bottom: 12px; }
+.consulta-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.consulta-meta { font-size: 14px; color: var(--muted); margin-top: 2px; }
+.consulta-obs { font-size: 13px; margin-top: 8px; background: var(--bg); padding: 8px 10px; border-radius: 8px; }
+
+/* ---- Tabela ---- */
+.table { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.table th { background: var(--teal); color: #fff; text-align: left; padding: 10px 12px; font-weight: 600; }
+.table td { padding: 9px 12px; border-top: 1px solid var(--border); }
+.table tr:nth-child(even) td { background: #fafcfd; }
+
+.toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+.hint { font-size: 12px; color: var(--danger); }
+.inline-input { width: 80px; }
