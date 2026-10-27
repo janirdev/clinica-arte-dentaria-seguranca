@@ -1,6 +1,7 @@
 package com.clinica.seguro.config;
 
 import com.clinica.seguro.security.AuthFilter;
+import com.clinica.seguro.security.RateLimitFilter;
 import com.clinica.seguro.security.TokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -35,11 +36,21 @@ public class AppConfig implements WebMvcConfigurer {
                 .allowedHeaders("Authorization", "Content-Type");
     }
 
-    // Regista o filtro de autenticacao para todos os /api/*.
+    // Rate limiting primeiro (corre antes da autenticacao), para todos os /api/*.
+    @Bean
+    public FilterRegistrationBean<RateLimitFilter> rateLimitFilter() {
+        FilterRegistrationBean<RateLimitFilter> reg = new FilterRegistrationBean<>(new RateLimitFilter());
+        reg.addUrlPatterns("/api/*");
+        reg.setOrder(1);
+        return reg;
+    }
+
+    // Autenticacao a seguir, para todos os /api/*.
     @Bean
     public FilterRegistrationBean<AuthFilter> authFilter(TokenService tokenService) {
         FilterRegistrationBean<AuthFilter> reg = new FilterRegistrationBean<>(new AuthFilter(tokenService));
         reg.addUrlPatterns("/api/*");
+        reg.setOrder(2);
         return reg;
     }
 }

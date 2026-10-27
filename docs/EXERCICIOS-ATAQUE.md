@@ -62,6 +62,34 @@ curl "http://localhost:8080/api/consultas/buscar?termo=%27%20OR%20%271%27=%271"
 (`termo = ' OR '1'='1`) devolve todos os registos.
 > **Defesa:** vulnerabilidade #7. Query parametrizada.
 
+## Exercício 7 — Disponibilidade: ausência de rate limiting (base de DoS)
+
+> ⚠️ **Teste de carga BENIGNO e limitado, só contra o teu localhost.** Não é uma
+> ferramenta de DDoS. O objetivo é **medir** se a API limita pedidos, não derrubar
+> nada. Mantém o número de pedidos baixo (ex.: 100). Nunca faças isto a sistemas
+> de terceiros.
+
+Enviar 100 pedidos e contar os códigos de resposta:
+
+```bash
+# Modo VULNERÁVEL (8080) — nunca limita
+for i in $(seq 1 100); do curl -s -o /dev/null -w "%{http_code}\n" \
+  http://localhost:8080/api/consultas; done | sort | uniq -c
+# Esperado: 100x "200"  (aceita tudo)
+
+# Modo SEGURO (8082) — limita por IP
+for i in $(seq 1 100); do curl -s -o /dev/null -w "%{http_code}\n" \
+  http://localhost:8082/api/consultas; done | sort | uniq -c
+# Esperado: alguns "401" e, a partir do limite, vários "429"  (bloqueia)
+```
+
+(No PowerShell: `1..100 | % { (Invoke-WebRequest -Uri http://localhost:8080/api/consultas -SkipHttpErrorCheck).StatusCode } | Group-Object`.)
+
+> **Lição:** sem rate limiting, uma única origem pode abusar da API (força bruta,
+> raspagem, exaustão). A versão segura responde `429 Too Many Requests` acima do
+> limite. **Defesa:** vulnerabilidade #12. Um DDoS real (muitas origens) mitiga-se
+> também na infraestrutura (CDN/WAF), não só no código.
+
 ---
 
 ## Parte B — Cenários de corrupção de dados
@@ -119,3 +147,4 @@ Para cada falha acima:
 - [ ] #9 Verificação de dono em PUT/DELETE + auditoria
 - [ ] #10 Consola H2 desligada
 - [ ] #11 Token assinado; erros genéricos
+- [ ] #12 Rate limiting por IP (429 acima do limite)

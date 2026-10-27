@@ -74,3 +74,10 @@ Mapeadas ao OWASP Top 10 quando aplicável.
 - **Onde:** `AuthController.login(...)` — token previsível `token-<id>-<perfil>` e mensagens que distinguem email/senha.
 - **Impacto:** token forjável; descoberta de emails válidos.
 - **Correção:** JWT assinado e com expiração; mensagem de erro genérica ("credenciais inválidas").
+
+## 12. Sem limitação de pedidos — abuso de recursos / DoS
+**OWASP A04 (Insecure Design) / API4 (Unrestricted Resource Consumption)**
+- **Onde:** o backend vulnerável (8080) não limita o número de pedidos por cliente.
+- **Impacto:** um único cliente pode inundar a API com pedidos (ex.: força bruta no login, raspagem de dados, exaustão de recursos), degradando o serviço para todos. É a base de um ataque de negação de serviço.
+- **Correção (já aplicada no modo seguro, 8082):** *rate limiting* por IP em `RateLimitFilter` — acima de 60 pedidos/10s por IP, responde `429 Too Many Requests` com cabeçalho `Retry-After`.
+- **Nota:** rate limiting na aplicação trava excesso de **uma** origem. Um DDoS real (muitas origens) mitiga-se mais acima (CDN/WAF, limites de infraestrutura, autoescala), não só no código.
