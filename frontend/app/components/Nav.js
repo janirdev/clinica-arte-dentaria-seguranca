@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/marcacao", label: "Marcar consulta" },
   { href: "/historico", label: "O meu histórico" },
   { href: "/admin", label: "Área reservada" },
+  { href: "/auditoria", label: "Auditoria" },
   { href: "/login", label: "Entrar" },
 ];
 

@@ -40,12 +40,34 @@ Aparece a nota clínica do Bruno ("Alergia a penicilina").
 3. Abrir `/admin` e recarregar.
 > **Defesa:** vulnerabilidade #4. Autorização tem de ser no servidor.
 
-## Exercício 4 — Fuga de senhas
+## Exercício 4 — Senhas guardadas em texto simples (sem encriptação)
+
+**(a) Pela API** — a lista vem com as senhas legíveis, sem autenticação:
 ```bash
 curl http://localhost:8080/api/pacientes
+# cada utilizador traz "senha":"ana123", etc.
 ```
-As senhas vêm em texto simples.
-> **Defesa:** vulnerabilidades #5. Hash + DTO sem senha.
+
+**(b) Na própria base de dados** — a prova de que estão em texto simples.
+Compara os dois schemas (o contentor do PostgreSQL chama-se `postgres_db`):
+```bash
+# VULNERÁVEL (schema public) -> senha LEGÍVEL
+docker exec postgres_db psql -U postgres -d clinica \
+  -c "SELECT nome, senha FROM public.usuarios;"
+#  Ana Costa | ana123
+
+# SEGURO (schema seguro) -> só o HASH BCrypt
+docker exec postgres_db psql -U postgres -d clinica \
+  -c "SELECT nome, senha FROM seguro.usuarios;"
+#  Ana Costa | $2a$10$o9XCQ0e...  (irreversível)
+```
+
+> **Impacto:** se a base de dados vazar (backup, SQLi, acesso indevido), todas as
+> senhas ficam expostas de imediato — e as pessoas costumam reutilizar senhas
+> noutros serviços.
+> **Defesa:** vulnerabilidade #5. Guardar apenas o **hash** (BCrypt/Argon2) e nunca
+> devolver a senha na API (usar DTO). No modo seguro, o `DataSeeder` grava com
+> `encoder.encode(...)` e o login valida com `encoder.matches(...)`.
 
 ## Exercício 5 — Criar um admin (Mass Assignment)
 ```bash
@@ -96,6 +118,11 @@ for i in $(seq 1 100); do curl -s -o /dev/null -w "%{http_code}\n" \
 
 > Demonstram **integridade** — como dados errados entram no sistema quando não há
 > verificação de dono nem validação no servidor.
+>
+> **Scripts prontos** (correm do diretório raiz do projeto):
+> - `bash scripts/demo-corrupcao-dados.sh` — executa o ataque (antes → corrompe → depois)
+>   e mostra o mesmo ataque a falhar (401) no backend seguro.
+> - `bash scripts/repor-dados.sh` — repõe os dados vulneráveis ao estado inicial.
 
 ### Cenário C1 — Reescrever a consulta de outro paciente
 ```bash
@@ -125,6 +152,38 @@ Entra um registo órfão (paciente 999 inexistente), com data inválida e estado
 Partindo do Exercício 6, discutir em grupo como um `termo` malicioso poderia ir além
 da leitura. **Mitigação imediata:** query parametrizada + utilizador de base de dados
 com privilégios mínimos (sem DDL/UPDATE onde não é preciso).
+
+---
+
+## Parte B2 — Auditoria (detetar a alteração, mesmo vinda de um ataque)
+
+A corrupção acima pode não se conseguir **impedir** no backend vulnerável, mas pode
+**ser registada**. A auditoria é feita na BASE DE DADOS (triggers em PostgreSQL),
+por isso capta toda a alteração venha de onde vier — a aplicação não a contorna.
+
+- **Onde:** `backend/src/main/resources/db/migration/V3__auditoria.sql`
+  (tabela `auditoria` + função `fn_auditoria()` + triggers em `consultas` e `usuarios`).
+- Cada INSERT/UPDATE/DELETE grava: operação, tabela, id, utilizador da BD, IP da
+  ligação, e o estado **antigo** e **novo** em JSON.
+
+**Demonstração:**
+```bash
+bash scripts/demo-corrupcao-dados.sh   # executa o ataque
+bash scripts/ver-auditoria.sh          # mostra o que ficou registado
+```
+Resultado típico — o ataque fica gravado com o antes→depois:
+```
+operacao | tabela    | registo_id | proc_antes | proc_depois | obs_depois
+UPDATE   | consultas |          3 | Canal      | CORROMPIDO  | dados adulterados pelo atacante
+INSERT   | consultas |          4 |            | NAO_EXISTE  | (registo órfão injetado)
+```
+
+> **Lições:**
+> - Auditar na BD (não só na app) garante registo mesmo que o atacante contorne a aplicação.
+> - A tabela `auditoria` devia ser *append-only* e com acesso restrito; um atacante com SQL
+>   total poderia apagá-la, por isso em produção usa-se também envio para um destino externo
+>   (SIEM/log central) que o atacante não controla.
+> - Detetar não substitui prevenir: combina auditoria com as correções da Parte C.
 
 ---
 
